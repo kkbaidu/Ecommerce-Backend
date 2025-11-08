@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import Review from "../models/Review.js";
 import Product from "../models/Product.js";
 
@@ -5,7 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import * as CustomError from "../errors/index.js";
 import { checkPermissions } from "../utils/index.js";
 
-const createReview = async (req, res) => {
+const createReview = async (req: Request, res: Response) => {
   const { product: productId } = req.body;
 
   const isValidProduct = await Product.findOne({ _id: productId });
@@ -16,6 +17,7 @@ const createReview = async (req, res) => {
 
   const alreadySubmitted = await Review.findOne({
     product: productId,
+    // @ts-ignore
     user: req.user.userId,
   });
 
@@ -24,12 +26,12 @@ const createReview = async (req, res) => {
       "Already submitted review for this product"
     );
   }
-
+  // @ts-ignore
   req.body.user = req.user.userId;
   const review = await Review.create(req.body);
   res.status(StatusCodes.CREATED).json({ review });
 };
-const getAllReviews = async (req, res) => {
+const getAllReviews = async (req: Request, res: Response) => {
   const reviews = await Review.find({}).populate({
     path: "product",
     select: "name company price",
@@ -37,7 +39,7 @@ const getAllReviews = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
 };
-const getSingleReview = async (req, res) => {
+const getSingleReview = async (req: Request, res: Response) => {
   const { id: reviewId } = req.params;
 
   const review = await Review.findOne({ _id: reviewId });
@@ -48,7 +50,7 @@ const getSingleReview = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ review });
 };
-const updateReview = async (req, res) => {
+const updateReview = async (req: Request, res: Response) => {
   const { id: reviewId } = req.params;
   const { rating, title, comment } = req.body;
 
@@ -58,6 +60,7 @@ const updateReview = async (req, res) => {
     throw new CustomError.NotFoundError(`No review with id ${reviewId}`);
   }
 
+  // @ts-ignore
   checkPermissions(req.user, review.user);
 
   review.rating = rating;
@@ -67,7 +70,7 @@ const updateReview = async (req, res) => {
   await review.save();
   res.status(StatusCodes.OK).json({ review });
 };
-const deleteReview = async (req, res) => {
+const deleteReview = async (req: Request, res: Response) => {
   const { id: reviewId } = req.params;
 
   const review = await Review.findOne({ _id: reviewId });
@@ -76,6 +79,7 @@ const deleteReview = async (req, res) => {
     throw new CustomError.NotFoundError(`No review with id ${reviewId}`);
   }
 
+  // @ts-ignore
   checkPermissions(req.user, review.user);
   // use deleteOne() to remove document (remove() is deprecated/not typed)
   await review.deleteOne();

@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 
@@ -10,7 +11,7 @@ const fakeStripeAPI = async ({ amount, currency }) => {
   return { client_secret, amount };
 };
 
-const createOrder = async (req, res) => {
+const createOrder = async (req: Request, res: Response) => {
   const { items: cartItems, tax, shippingFee } = req.body;
 
   if (!cartItems || cartItems.length < 1) {
@@ -60,6 +61,7 @@ const createOrder = async (req, res) => {
     tax,
     shippingFee,
     clientSecret: paymentIntent.client_secret,
+    // @ts-ignore
     user: req.user.userId,
   });
 
@@ -67,24 +69,26 @@ const createOrder = async (req, res) => {
     .status(StatusCodes.CREATED)
     .json({ order, clientSecret: order.clientSecret });
 };
-const getAllOrders = async (req, res) => {
+const getAllOrders = async (req: Request, res: Response) => {
   const orders = await Order.find({});
   res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
-const getSingleOrder = async (req, res) => {
+const getSingleOrder = async (req: Request, res: Response) => {
   const { id: orderId } = req.params;
   const order = await Order.findOne({ _id: orderId });
   if (!order) {
     throw new CustomError.NotFoundError(`No order with id : ${orderId}`);
   }
+  // @ts-ignore
   checkPermissions(req.user, order.user);
   res.status(StatusCodes.OK).json({ order });
 };
-const getCurrentUserOrders = async (req, res) => {
+const getCurrentUserOrders = async (req: Request, res: Response) => {
+  // @ts-ignore
   const orders = await Order.find({ user: req.user.userId });
   res.status(StatusCodes.OK).json({ orders, count: orders.length });
 };
-const updateOrder = async (req, res) => {
+const updateOrder = async (req: Request, res: Response) => {
   const { id: orderId } = req.params;
   const { paymentIntentId } = req.body;
 
@@ -92,6 +96,7 @@ const updateOrder = async (req, res) => {
   if (!order) {
     throw new CustomError.NotFoundError(`No order with id : ${orderId}`);
   }
+  // @ts-ignore
   checkPermissions(req.user, order.user);
 
   order.paymentIntentId = paymentIntentId;

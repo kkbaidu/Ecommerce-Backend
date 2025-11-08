@@ -1,4 +1,4 @@
-// @ts-nocheck
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import User from "../models/User.js";
 import * as CustomError from "../errors/index.js";
@@ -14,11 +14,12 @@ export const getAllUsers = async (req: any, res: any) => {
   res.status(StatusCodes.OK).json({ users });
 };
 
-export const getSingleUser = async (req: any, res: any) => {
+export const getSingleUser = async (req: Request, res: Response) => {
   const user = await User.findOne({ _id: req.params.id }).select("-password");
   if (!user) {
     throw new CustomError.NotFoundError(`No user with id : ${req.params.id}`);
   }
+  // @ts-ignore
   checkPermissions(req.user, user._id);
   res.status(StatusCodes.OK).json({ user });
 };
@@ -35,9 +36,12 @@ export const updateUser = async (req: any, res: any) => {
   }
   const user = await User.findOne({ _id: req.user.userId });
 
+  // @ts-ignore
   user.email = email;
+  // @ts-ignore
   user.name = name;
 
+  // @ts-ignore
   await user.save();
 
   const tokenUser = createTokenUser(user);
@@ -52,12 +56,15 @@ export const updateUserPassword = async (req: any, res: any) => {
   }
   const user = await User.findOne({ _id: req.user.userId });
 
+  // @ts-ignore
   const isPasswordCorrect = await user.comparePassword(oldPassword);
   if (!isPasswordCorrect) {
     throw new CustomError.UnauthenticatedError("Invalid Credentials");
   }
+  // @ts-ignore
   user.password = newPassword;
 
+  // @ts-ignore
   await user.save();
   res.status(StatusCodes.OK).json({ msg: "Success! Password Updated." });
 };

@@ -1,19 +1,22 @@
+import { Request, Response } from "express";
 import Product from "../models/Product.js";
 import { StatusCodes } from "http-status-codes";
 import * as CustomError from "../errors/index.js";
 import path from "path";
 
-const createProduct = async (req, res) => {
+const createProduct = async (req: Request, res: Response) => {
+  // @ts-ignore
   req.body.user = req.user.userId;
   const product = await Product.create(req.body);
   res.status(StatusCodes.CREATED).json({ product });
 };
-const getAllProducts = async (req, res) => {
+const getAllProducts = async (req: Request, res: Response) => {
   const products = await Product.find({});
 
   res.status(StatusCodes.OK).json({ products, count: products.length });
 };
-const getSingleProduct = async (req, res) => {
+
+const getSingleProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
 
   const product = await Product.findOne({ _id: productId }).populate("reviews");
@@ -24,7 +27,8 @@ const getSingleProduct = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ product });
 };
-const updateProduct = async (req, res) => {
+
+const updateProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
 
   const product = await Product.findOneAndUpdate({ _id: productId }, req.body, {
@@ -38,7 +42,8 @@ const updateProduct = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ product });
 };
-const deleteProduct = async (req, res) => {
+
+const deleteProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
 
   const product = await Product.findOne({ _id: productId });
@@ -50,10 +55,13 @@ const deleteProduct = async (req, res) => {
   await product.deleteOne();
   res.status(StatusCodes.OK).json({ msg: "Success! Product removed." });
 };
-const uploadImage = async (req, res) => {
+
+const uploadImage = async (req: Request, res: Response) => {
+  // @ts-ignore
   if (!req.files) {
     throw new CustomError.BadRequestError("No File Uploaded");
   }
+  // @ts-ignore
   const productImage = req.files.image;
 
   if (!productImage.mimetype.startsWith("image")) {

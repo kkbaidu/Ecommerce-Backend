@@ -1,10 +1,10 @@
-// @ts-nocheck
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import User from "../models/User.js";
 import * as CustomError from "../errors/index.js";
 import { attachCookiesToResponse, createTokenUser } from "../utils/index.js";
 
-export const register = async (req: any, res: any) => {
+export const register = async (req: Request, res: Response) => {
   const { email, name, password } = req.body;
   const emailAlreadyExists = await User.findOne({ email });
   if (emailAlreadyExists) {
@@ -19,7 +19,7 @@ export const register = async (req: any, res: any) => {
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
 
-export const login = async (req: any, res: any) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
     throw new CustomError.BadRequestError("Please provide email and password");
@@ -28,6 +28,7 @@ export const login = async (req: any, res: any) => {
   if (!user) {
     throw new CustomError.UnauthenticatedError("Invalid Credentials");
   }
+  // @ts-ignore
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
     throw new CustomError.UnauthenticatedError("Invalid Credentials");
